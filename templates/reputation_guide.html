@@ -1,0 +1,186 @@
+
+{% extends "base.html" %}
+
+{% block title %}Гайд по репутации - Minecraft Bedwars Leaderboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="hero-section p-4 mb-4">
+                <h1 class="display-4 mb-3">
+                    <i class="fas fa-star text-info me-3"></i>
+                    Система репутации
+                </h1>
+                <p class="lead">Узнайте, как заработать и использовать репутацию</p>
+                
+                {% if current_player %}
+                <div class="mt-4">
+                    <div class="d-inline-block p-3 bg-dark rounded">
+                        <span class="h4 text-info me-2">
+                            <i class="fas fa-star"></i> {{ current_player.reputation }}
+                        </span>
+                        <span class="text-muted">Ваша репутация</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="guide-card">
+                <h3 class="text-info mb-3">
+                    <i class="fas fa-question-circle me-2"></i>Что такое репутация?
+                </h3>
+                <p>Репутация - это показатель вашего статуса и достижений на сервере. Чем выше репутация, тем больше возможностей у вас есть.</p>
+                
+                <h4 class="text-warning mt-4 mb-3">Зачем нужна репутация?</h4>
+                <ul>
+                    <li>Покупка эксклюзивных товаров в магазине</li>
+                    <li>Разблокировка специальных функций</li>
+                    <li>Демонстрация вашего статуса</li>
+                    <li>Участие в эксклюзивных событиях</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="guide-card">
+                <h3 class="text-success mb-3">
+                    <i class="fas fa-trophy me-2"></i>Как заработать репутацию?
+                </h3>
+                
+                <div class="reputation-source mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-medal text-warning me-2"></i>Выполнение достижений</span>
+                        <span class="badge bg-success">+10-100</span>
+                    </div>
+                </div>
+
+                <div class="reputation-source mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-scroll text-info me-2"></i>Завершение квестов</span>
+                        <span class="badge bg-success">+5-50</span>
+                    </div>
+                </div>
+
+                <div class="reputation-source mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-sword text-danger me-2"></i>Высокие игровые показатели</span>
+                        <span class="badge bg-success">+1-25</span>
+                    </div>
+                </div>
+
+                <div class="reputation-source mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-users text-primary me-2"></i>Активность в сообществе</span>
+                        <span class="badge bg-success">+5-20</span>
+                    </div>
+                </div>
+
+                <div class="reputation-source mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-gift text-warning me-2"></i>Награды от администрации</span>
+                        <span class="badge bg-success">+50-500</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="guide-card">
+                <h3 class="text-warning mb-4">
+                    <i class="fas fa-shopping-cart me-2"></i>Что можно купить за репутацию?
+                </h3>
+                
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="reputation-item">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-crown fa-3x text-warning"></i>
+                            </div>
+                            <h5 class="text-center">Эксклюзивные титулы</h5>
+                            <p class="text-center text-muted">Особые титулы, недоступные за койны</p>
+                            <div class="text-center">
+                                <span class="badge bg-info">100-1000 репутации</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="reputation-item">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-palette fa-3x text-info"></i>
+                            </div>
+                            <h5 class="text-center">Уникальные темы</h5>
+                            <p class="text-center text-muted">Редкие темы оформления профиля</p>
+                            <div class="text-center">
+                                <span class="badge bg-info">200-800 репутации</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="reputation-item">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-rocket fa-3x text-success"></i>
+                            </div>
+                            <h5 class="text-center">Мощные бустеры</h5>
+                            <p class="text-center text-muted">Усиленные бустеры опыта и койнов</p>
+                            <div class="text-center">
+                                <span class="badge bg-info">150-500 репутации</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('shop') }}" class="btn btn-success btn-lg me-3">
+                <i class="fas fa-shopping-cart me-2"></i>Посетить магазин
+            </a>
+            <a href="{{ url_for('achievements') }}" class="btn btn-info btn-lg me-3">
+                <i class="fas fa-medal me-2"></i>Просмотреть достижения
+            </a>
+            <a href="{{ url_for('quests') }}" class="btn btn-warning btn-lg">
+                <i class="fas fa-scroll me-2"></i>Выполнить квесты
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.guide-card {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.reputation-source {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border-left: 4px solid var(--info-color);
+}
+
+.reputation-item {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.reputation-item:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %}

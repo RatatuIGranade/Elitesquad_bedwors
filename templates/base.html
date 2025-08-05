@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Minecraft Bedwars Leaderboard{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    <!-- Dynamic Theme Styles -->
+    <style>
+        :root {
+            {% if session.current_theme %}
+            --primary-color: {{ session.current_theme.primary_color }};
+            --secondary-color: {{ session.current_theme.secondary_color }};
+            --bg-primary: {{ session.current_theme.background_color }};
+            --bg-secondary: {{ session.current_theme.card_background }};
+            --text-color: {{ session.current_theme.text_color }};
+            --accent-color: {{ session.current_theme.accent_color }};
+            {% else %}
+            --primary-color: #ffc107;
+            --secondary-color: #17a2b8;
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --text-color: #ffffff;
+            --accent-color: #28a745;
+            {% endif %}
+
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+        }
+
+        body {
+            background: var(--bg-primary) !important;
+            color: var(--text-color) !important;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: var(--bg-secondary) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-brand {
+            color: var(--primary-color) !important;
+            font-weight: bold;
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--text-color) !important;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .card {
+            background: var(--bg-secondary) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: var(--text-color) !important;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: var(--bg-primary) !important;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
+        }
+
+        .table-dark {
+            --bs-table-bg: var(--bg-secondary);
+            --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+            --bs-table-hover-bg: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .alert {
+            background: var(--bg-secondary) !important;
+            border: 1px solid var(--primary-color) !important;
+            color: var(--text-color) !important;
+        }
+
+        .form-control {
+            background: var(--bg-secondary) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            color: var(--text-color) !important;
+        }
+
+        .form-control:focus {
+            background: var(--bg-secondary) !important;
+            border-color: var(--primary-color) !important;
+            color: var(--text-color) !important;
+            box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25) !important;
+        }
+
+        .badge {
+            color: var(--bg-primary) !important;
+        }
+
+        .text-muted {
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+
+        .dropdown-menu {
+            background: var(--bg-secondary) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .dropdown-item {
+            color: var(--text-color) !important;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: var(--primary-color) !important;
+        }
+
+        /* Chart container styling */
+        .chart-card {
+            background: var(--bg-secondary) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .stat-box {
+            background: var(--bg-secondary) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .top-list-card {
+            background: var(--bg-secondary) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .reputation-display {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.4);
+        }
+
+        .reputation-display:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 123, 255, 0.6);
+            border-color: rgba(0, 123, 255, 0.5);
+        }
+
+        /* Custom Cursor */
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease-out;
+            opacity: 0.8;
+        }
+
+        .custom-cursor--hidden {
+            opacity: 0;
+        }
+
+        .custom-cursor--hover {
+            transform: scale(1.5);
+            border-color: var(--accent-color);
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <i class="fas fa-cube text-warning me-2 glow-effect"></i>
+                <span class="fw-bold elite-squad-text">ᴇʟɪᴛᴇ ꜱQᴜᴀᴅ Bedwars</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!-- Main navigation - icon only -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}" title="Лидеры">
+                            <i class="fas fa-trophy"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('statistics') }}" title="Статистика">
+                            <i class="fas fa-chart-bar"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('quests') }}" title="Квесты">
+                            <i class="fas fa-scroll"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('achievements') }}" title="Достижения">
+                            <i class="fas fa-medal"></i>
+                        </a>
+                    </li>
+                    <!-- Clans and Tournaments in a separate container -->
+                    <div class="clan-tournaments-container">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('clans') }}">
+                                <i class="fas fa-shield-alt me-1"></i>Кланы
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('tournaments') }}">
+                                <i class="fas fa-crown me-1"></i>Турниры
+                            </a>
+                        </li>
+                    </div>
+                </ul>
+
+                <div class="user-panel">
+                    {% if current_player %}
+                    <!-- Active Boosters Display -->
+                    {% if current_player.active_boosters %}
+                    <div class="dropdown">
+                        <a class="user-panel-item dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown" title="Активные бустеры">
+                            <i class="fas fa-fire"></i>
+                            <span class="badge bg-warning text-dark rounded-pill ms-1">{{ current_player.active_boosters|length }}</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for booster in current_player.active_boosters %}
+                            {% if not booster.is_expired %}
+                            <li class="dropdown-item-text">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <i class="fas fa-fire me-2 text-warning"></i>
+                                        x{{ booster.multiplier }}
+                                        {% if booster.booster_type == 'active_coins_booster' %}коины
+                                        {% elif booster.booster_type == 'active_reputation_booster' %}репутация
+                                        {% else %}всё{% endif %}
+                                    </span>
+                                    <small class="text-muted">{{ (booster.time_remaining // 60) }}м {{ (booster.time_remaining % 60) }}с</small>
+                                </div>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('shop') }}" class="user-panel-item" title="Магазин">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <div class="dropdown">
+                        <a class="user-panel-item dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" title="Койны">
+                            <span class="coins-display">
+                                <i class="fas fa-coins me-1"></i>{{ current_player.coins }}
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('coins_guide') }}">
+                                <i class="fas fa-info-circle me-2"></i>Как заработать койны?
+                            </a></li>
+                        </ul>
+                    </div>
+                    <div class="dropdown">
+                        <a class="user-panel-item dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" title="Репутация">
+                            <span class="reputation-display">
+                                <i class="fas fa-star me-1"></i>{{ current_player.reputation }}
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('reputation_guide') }}">
+                                <i class="fas fa-info-circle me-2"></i>Как заработать репутацию?
+                            </a></li>
+                        </ul>
+                    </div>
+                    <div class="dropdown">
+                        <a class="user-panel-item dropdown-toggle text-info" href="#" role="button" data-bs-toggle="dropdown" title="Профиль">
+                            <i class="fas fa-gamepad me-1"></i>{{ current_player.nickname }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('my_profile') }}">
+                                <i class="fas fa-user me-2"></i>Мой профиль
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('player_logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Выйти
+                            </a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('player_login') }}" class="user-panel-item" title="Вход игрока">
+                        <i class="fas fa-sign-in-alt me-1"></i>Вход
+                    </a>
+                    {% endif %}
+
+                    {% if session.get('is_admin') %}
+                    <div class="dropdown">
+                        <a class="user-panel-item dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown" title="Администратор">
+                            <i class="fas fa-crown"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('admin') }}">
+                                <i class="fas fa-cogs me-2"></i>Панель админа
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin_shop') }}">
+                                <i class="fas fa-store me-2"></i>Управление магазином
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin_reputation') }}">
+                                <i class="fas fa-star me-2"></i>Управление репутацией
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Выйти из админки
+                            </a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="user-panel-item" title="Админ">
+                        <i class="fas fa-shield-alt"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' }} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% if error_message %}
+                <div class="text-center py-5">
+                    <i class="fas fa-exclamation-triangle text-warning display-1"></i>
+                    <h2 class="mt-3">{{ error_message }}</h2>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-home me-2"></i>На главную
+                    </a>
+                </div>
+            {% else %}
+                {% block content %}{% endblock %}
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-cube text-warning me-2 glow-effect"></i><span class="elite-squad-text">ᴇʟɪᴛᴇ ꜱQᴜᴀᴅ Bedwars</span></h5>
+                    <p class="text-muted">Современная система рейтинга игроков</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-clock me-1"></i>
+                        Последнее обновление: <span id="current-time"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Custom Cursor -->
+    <div class="custom-cursor" id="customCursor"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <script>
+        // Custom Cursor Logic
+        const cursor = document.getElementById('customCursor');
+        let cursorVisible = true;
+        let cursorScaled = false;
+
+        const updateCursorPosition = (e) => {
+            cursor.style.transform = `translate(${e.clientX - cursor.offsetWidth / 2}px, ${e.clientY - cursor.offsetHeight / 2}px)`;
+        };
+
+        const toggleCursorVisibility = (isVisible) => {
+            if (isVisible) {
+                cursor.classList.remove('custom-cursor--hidden');
+            } else {
+                cursor.classList.add('custom-cursor--hidden');
+            }
+            cursorVisible = isVisible;
+        };
+
+        const toggleCursorScaling = (isHovering) => {
+            if (isHovering && !cursorScaled) {
+                cursor.classList.add('custom-cursor--hover');
+                cursorScaled = true;
+            } else if (!isHovering && cursorScaled) {
+                cursor.classList.remove('custom-cursor--hover');
+                cursorScaled = false;
+            }
+        };
+
+        document.addEventListener('mousemove', (e) => {
+            updateCursorPosition(e);
+            if (!cursorVisible) {
+                toggleCursorVisibility(true);
+            }
+        });
+
+        document.addEventListener('mouseleave', () => {
+            toggleCursorVisibility(false);
+        });
+
+        document.addEventListener('mouseenter', () => {
+            toggleCursorVisibility(true);
+        });
+
+        document.querySelectorAll('a, button, .user-panel-item, .dropdown-item').forEach(el => {
+            el.addEventListener('mouseover', () => toggleCursorScaling(true));
+            el.addEventListener('mouseout', () => toggleCursorScaling(false));
+        });
+
+        // Initial setup to hide cursor if mouse is not yet moved
+        toggleCursorVisibility(false);
+
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
